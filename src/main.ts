@@ -11,18 +11,6 @@ type IWheater = {
   forecast_days: string;
 };
 
-const mainDiv = document.querySelector<HTMLDialogElement>(".box");
-const errorDiv = document.querySelector<HTMLDivElement>(".error");
-const city = document.querySelector<HTMLParagraphElement>(".city");
-const time = document.querySelector<HTMLParagraphElement>(".time");
-const temperature =
-  document.querySelector<HTMLParagraphElement>(".temperature");
-const tempDesc = document.querySelector<HTMLParagraphElement>(".temp-desc");
-const wind = document.querySelector<HTMLSpanElement>(".wind");
-const humdity = document.querySelector<HTMLSpanElement>(".humidity");
-const precipitacion = document.querySelector<HTMLSpanElement>(".precipitacion");
-const img = document.querySelector<HTMLImageElement>(".weather-img");
-
 type Data = {
   current: {
     time: string;
@@ -44,6 +32,10 @@ type Data = {
   };
 };
 
+const divBox = document.querySelector<HTMLDialogElement>(".box");
+const errorDiv = document.querySelector<HTMLDivElement>(".error");
+
+
 async function getIP() {
   try {
     const resIp = await fetch("http://ip-api.com/json/");
@@ -51,7 +43,6 @@ async function getIP() {
       throw new Error(`${resIp.status}`);
     }
     const dataIp = await resIp.json();
-
     return {
       latitude: dataIp.lat,
       longitude: dataIp.lon,
@@ -59,8 +50,8 @@ async function getIP() {
       timezone: dataIp.timezone,
     };
   } catch (err) {
-    if (mainDiv) {
-      mainDiv.remove();
+    if (divBox) {
+      divBox.remove();
     }
     if (errorDiv) {
       const p = document.createElement("p");
@@ -74,118 +65,66 @@ async function getIP() {
 }
 const coorsIp = await getIP();
 
-const params: IWheater = {
-  current: [
-    "temperature_2m",
-    "relative_humidity_2m",
-    "precipitation",
-    "rain",
-    "wind_speed_10m",
-    "weather_code",
-    "is_day",
-  ].join(","),
-  forecast_days: "1",
-};
-
-const searchParamsIp = new URLSearchParams({
-  ...coorsIp,
-  ...params,
-});
-
-const coorsGhana: ICoord = {
-  latitude: "12.01",
-  longitude: "20.75",
-};
-
-const coorsTashkent: ICoord = {
-  latitude: "41.25",
-  longitude: "69.25",
-};
-
-const searchParamsGhana = new URLSearchParams({
-  ...coorsGhana,
-  ...params,
-});
-
-const searchParamsTashkent = new URLSearchParams({
-  ...coorsTashkent,
-  ...params,
-});
-
-const links = [
-  `https://api.open-meteo.com/v1/forecast?${searchParamsIp}`,
-  `https://api.open-meteo.com/v1/forecast?${searchParamsGhana}`,
-  `https://api.open-meteo.com/v1/forecast?${searchParamsTashkent}`,
-];
-
-async function weatherWithIP(): Promise<void> {
+async function paramsFunction() {
   try {
-    const respLinks = await Promise.all(
-      links.map((url) =>
-        fetch(url).then((response) => {
-          if (!response.ok) {
-            throw new Error("");
-          }
-          return response.json();
-        })
-      )
-    );
-    const json: Data = respLinks[0];
-    const weatherCode =
-      json.current.weather_code.toString() as keyof typeof descriptions;
-    const timeBerlin = new Date().toLocaleString("ru-RU", {
-      timeZone: "Europe/Berlin",
-      hour: "2-digit",
-      minute: "2-digit",
+
+    const params: IWheater = {
+      current: [
+        "temperature_2m",
+        "relative_humidity_2m",
+        "precipitation",
+        "rain",
+        "wind_speed_10m",
+        "weather_code",
+        "is_day",
+      ].join(","),
+      forecast_days: "1",
+    };
+
+    const searchParamsIp = new URLSearchParams({
+      ...coorsIp,
+      ...params,
     });
 
-    if (city) {
-      if (coorsIp) {
-        city.innerText = coorsIp.city;
-      }
-    }
+    const coorsGhana: ICoord = {
+      latitude: "12.01",
+      longitude: "20.75",
+    };
 
-    if (time) {
-      time.innerText = timeBerlin;
-    }
+    const coorsTashkent: ICoord = {
+      latitude: "41.25",
+      longitude: "69.25",
+    };
 
-    if (temperature) {
-      temperature.innerText =
-        Math.round(json.current.temperature_2m) +
-        json.current_units.temperature_2m;
-    }
+    const searchParamsGhana = new URLSearchParams({
+      ...coorsGhana,
+      ...params,
+    });
 
-    if (tempDesc) {
-      json.current.is_day === 1
-        ? (tempDesc.innerText = descriptions[weatherCode].day.description)
-        : (tempDesc.innerText = descriptions[weatherCode].night.description);
-    }
+    const searchParamsTashkent = new URLSearchParams({
+      ...coorsTashkent,
+      ...params,
+    });
 
-    if (wind) {
-      wind.innerText =
-        json.current.wind_speed_10m + " " + json.current_units.wind_speed_10m;
-    }
+    const links = [
+      `https://api.open-meteo.com/v1/forecast?${searchParamsIp}`,
+      `https://api.open-meteo.com/v1/forecast?${searchParamsGhana}`,
+      `https://api.open-meteo.com/v1/forecast?${searchParamsTashkent}`,
+    ];
 
-    if (humdity) {
-      humdity.innerText =
-        json.current.relative_humidity_2m +
-        " " +
-        json.current_units.relative_humidity_2m;
-    }
-
-    if (precipitacion) {
-      precipitacion.innerText =
-        json.current.precipitation + " " + json.current_units.precipitation;
-    }
-
-    if (img) {
-      json.current.is_day === 1
-        ? (img.src = descriptions[weatherCode].day.image)
-        : (img.src = descriptions[weatherCode].night.image);
-    }
+    const response = await Promise.all(
+      links.map(async (url) => {
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`${response.status}`);
+        }
+        return await response.json();
+      })
+    );
+    return response;
   } catch (err) {
-    if (mainDiv) {
-      mainDiv.remove();
+    if (divBox) {
+      divBox.remove();
     }
     if (errorDiv) {
       const p = document.createElement("p");
@@ -198,15 +137,13 @@ async function weatherWithIP(): Promise<void> {
   }
 }
 
-setInterval(weatherWithIP, 60000);
-
-weatherWithIP();
+const respLinks = await paramsFunction();
 
 const getBox = function (box: {
   city: string;
   time: string;
   temperature: string;
-  tempdesc: string;
+  tempDesc: string;
   conditions: string[];
   img: string;
 }) {
@@ -215,7 +152,7 @@ const getBox = function (box: {
         <p class="time">${box.time}</p>
         <div class="temperature-div">
           <p class="temperature">${box.temperature}</p>
-          <p class="temp-desc">${box.tempdesc}</p>
+          <p class="temp-desc">${box.tempDesc}</p>
         </div>
         <div class="conditions">
           <div class="div-icons-span">
@@ -237,122 +174,135 @@ const getBox = function (box: {
       </div>`;
 };
 
-async function boxGhana() {
+async function box() {
   try {
-    const respLinks = await Promise.all(
-      links.map(async (url) => {
-        const response = await fetch(url);
-        if (!response.ok) {
-          throw new Error(`${response.status}`);
-        }
-        return await response.json();
-      })
-    );
-    const json: Data = await respLinks[1];
-    const weatherCode =
-      json.current.weather_code.toString() as keyof typeof descriptions;
-    const time = new Date().toLocaleString("ru-RU", {
+    const jsonWeatherWithIP: Data = await respLinks?.[0];
+    const weatherCodeIP =
+      jsonWeatherWithIP.current.weather_code.toString() as keyof typeof descriptions;
+    const timeIP = new Date().toLocaleString("ru-RU", {
+      timeZone: coorsIp?.timezone,
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    const dataIP = {
+      city: coorsIp?.city,
+      time: timeIP,
+      temperature:
+        jsonWeatherWithIP.current.temperature_2m +
+        jsonWeatherWithIP.current_units.temperature_2m,
+      tempDesc:
+        jsonWeatherWithIP.current.is_day === 1
+          ? descriptions[weatherCodeIP].day.description
+          : descriptions[weatherCodeIP].night.description,
+      conditions: [
+        jsonWeatherWithIP.current.wind_speed_10m +
+          " " +
+          jsonWeatherWithIP.current_units.wind_speed_10m,
+        jsonWeatherWithIP.current.relative_humidity_2m +
+          " " +
+          jsonWeatherWithIP.current_units.relative_humidity_2m,
+        jsonWeatherWithIP.current.precipitation +
+          " " +
+          jsonWeatherWithIP.current_units.precipitation,
+      ],
+      img:
+        jsonWeatherWithIP.current.is_day === 1
+          ? descriptions[weatherCodeIP].day.image
+          : descriptions[weatherCodeIP].night.image,
+    };
+
+    const boxWeatherWithIP = getBox(dataIP);
+
+    if (divBox) {
+      divBox.insertAdjacentHTML("beforeend", boxWeatherWithIP);
+    }
+
+    const jsonGhana: Data = await respLinks?.[1];
+    const weatherCodeGhana =
+      jsonGhana.current.weather_code.toString() as keyof typeof descriptions;
+    const timeGhana = new Date().toLocaleString("ru-RU", {
       timeZone: "Africa/Accra",
       hour: "2-digit",
       minute: "2-digit",
     });
 
-    const data = {
+    const dataGhana = {
       city: "Ghana",
-      time: time,
+      time: timeGhana,
       temperature:
-        json.current.temperature_2m + json.current_units.temperature_2m,
-      tempdesc:
-        json.current.is_day === 1
-          ? descriptions[weatherCode].day.description
-          : descriptions[weatherCode].night.description,
+        jsonGhana.current.temperature_2m +
+        jsonGhana.current_units.temperature_2m,
+      tempDesc:
+        jsonGhana.current.is_day === 1
+          ? descriptions[weatherCodeGhana].day.description
+          : descriptions[weatherCodeGhana].night.description,
       conditions: [
-        json.current.wind_speed_10m + " " + json.current_units.wind_speed_10m,
-        json.current.relative_humidity_2m +
+        jsonGhana.current.wind_speed_10m +
           " " +
-          json.current_units.relative_humidity_2m,
-        json.current.precipitation + " " + json.current_units.precipitation,
+          jsonGhana.current_units.wind_speed_10m,
+        jsonGhana.current.relative_humidity_2m +
+          " " +
+          jsonGhana.current_units.relative_humidity_2m,
+        jsonGhana.current.precipitation +
+          " " +
+          jsonGhana.current_units.precipitation,
       ],
       img:
-        json.current.is_day === 1
-          ? descriptions[weatherCode].day.image
-          : descriptions[weatherCode].night.image,
+        jsonGhana.current.is_day === 1
+          ? descriptions[weatherCodeGhana].day.image
+          : descriptions[weatherCodeGhana].night.image,
     };
 
-    const box = getBox(data);
+    const boxGhana = getBox(dataGhana);
 
-    const divBox = document.querySelector<HTMLDivElement>(".box");
     if (divBox) {
-      divBox.insertAdjacentHTML("beforeend", box);
+      divBox.insertAdjacentHTML("beforeend", boxGhana);
     }
-  } catch (err) {
-    if (mainDiv) {
-      mainDiv.remove();
-    }
-    if (errorDiv) {
-      const p = document.createElement("p");
-      p.innerText = `${err} Мы работаем над устранением проблемы.`;
-      const image = document.createElement("img");
-      image.src = "./public/Frame-14-128x128.png";
-      errorDiv.appendChild(image);
-      errorDiv.appendChild(p);
-    }
-  }
-}
 
-boxGhana();
-
-async function boxTashkent() {
-  try {
-    const respLinks = await Promise.all(
-      links.map(async (url) => {
-        const response = await fetch(url);
-        if (!response.ok) {
-          throw new Error("");
-        }
-        return await response.json();
-      })
-    );
-    const json: Data = await respLinks[2];
-    const weatherCode =
-      json.current.weather_code.toString() as keyof typeof descriptions;
-    const time = new Date().toLocaleString("ru-RU", {
+    const jsonToshkent: Data = await respLinks?.[2];
+    const weatherCodeToshkent =
+      jsonToshkent.current.weather_code.toString() as keyof typeof descriptions;
+    const timeToshkent = new Date().toLocaleString("ru-RU", {
       timeZone: "Asia/Tashkent",
       hour: "2-digit",
       minute: "2-digit",
     });
 
-    const data = {
+    const dataToshkent = {
       city: "Tashkent",
-      time: time,
+      time: timeToshkent,
       temperature:
-        json.current.temperature_2m + json.current_units.temperature_2m,
-      tempdesc:
-        json.current.is_day === 1
-          ? descriptions[weatherCode].day.description
-          : descriptions[weatherCode].night.description,
+        jsonToshkent.current.temperature_2m +
+        jsonToshkent.current_units.temperature_2m,
+      tempDesc:
+        jsonToshkent.current.is_day === 1
+          ? descriptions[weatherCodeToshkent].day.description
+          : descriptions[weatherCodeToshkent].night.description,
       conditions: [
-        json.current.wind_speed_10m + " " + json.current_units.wind_speed_10m,
-        json.current.relative_humidity_2m +
+        jsonToshkent.current.wind_speed_10m +
           " " +
-          json.current_units.relative_humidity_2m,
-        json.current.precipitation + " " + json.current_units.precipitation,
+          jsonToshkent.current_units.wind_speed_10m,
+        jsonToshkent.current.relative_humidity_2m +
+          " " +
+          jsonToshkent.current_units.relative_humidity_2m,
+        jsonToshkent.current.precipitation +
+          " " +
+          jsonToshkent.current_units.precipitation,
       ],
       img:
-        json.current.is_day === 1
-          ? descriptions[weatherCode].day.image
-          : descriptions[weatherCode].night.image,
+        jsonToshkent.current.is_day === 1
+          ? descriptions[weatherCodeToshkent].day.image
+          : descriptions[weatherCodeToshkent].night.image,
     };
 
-    const box = getBox(data);
+    const boxToshkent = getBox(dataToshkent);
 
-    const divBox = document.querySelector<HTMLDivElement>(".box");
     if (divBox) {
-      divBox.insertAdjacentHTML("beforeend", box);
+      divBox.insertAdjacentHTML("beforeend", boxToshkent);
     }
   } catch (err) {
-    if (mainDiv) {
-      mainDiv.remove();
+    if (divBox) {
+      divBox.remove();
     }
     if (errorDiv) {
       const p = document.createElement("p");
@@ -365,7 +315,7 @@ async function boxTashkent() {
   }
 }
 
-boxTashkent();
+box();
 
 function update() {
   const removeDiv = document.querySelectorAll<HTMLDivElement>("#con1");
@@ -374,7 +324,7 @@ function update() {
       elem.remove();
     });
   }
-  boxTashkent();
-  boxGhana();
+
+  box();
 }
 setInterval(update, 60000);

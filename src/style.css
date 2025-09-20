@@ -8,7 +8,7 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #7d7680;
+  background-color: #4a4949;
 }
 
 a {
@@ -41,7 +41,7 @@ body {
     color: #ffffff;
   }
   .container {
-    background-color: #4e4444;
+    background-color: #000000;
   }
   .icons {
     filter: invert(100%);
