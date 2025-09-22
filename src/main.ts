@@ -57,7 +57,7 @@ async function getIP() {
       const p = document.createElement("p");
       p.innerText = `${err} Мы работаем над устранением проблемы.`;
       const image = document.createElement("img");
-      image.src = "./public/Frame-14-128x128.png";
+      image.src = "./public/error.png";
       errorDiv.appendChild(image);
       errorDiv.appendChild(p);
     }
@@ -67,7 +67,6 @@ const coorsIp = await getIP();
 
 async function paramsFunction() {
   try {
-
     const params: IWheater = {
       current: [
         "temperature_2m",
@@ -114,11 +113,11 @@ async function paramsFunction() {
 
     const response = await Promise.all(
       links.map(async (url) => {
-        const response = await fetch(url);
-        if (!response.ok) {
-          throw new Error(`${response.status}`);
+        const responseUrl = await fetch(url);
+        if (!responseUrl.ok) {
+          throw new Error(`${responseUrl.status}`);
         }
-        return await response.json();
+        return await responseUrl.json();
       })
     );
     return response;
@@ -130,7 +129,7 @@ async function paramsFunction() {
       const p = document.createElement("p");
       p.innerText = `${err} Мы работаем над устранением проблемы.`;
       const image = document.createElement("img");
-      image.src = "./public/Frame-14-128x128.png";
+      image.src = "./public/error.png";
       errorDiv.appendChild(image);
       errorDiv.appendChild(p);
     }
@@ -156,15 +155,15 @@ const getBox = function (box: {
         </div>
         <div class="conditions">
           <div class="div-icons-span">
-            <img class="icons" src="./public/116720.png" alt="" />
+            <img class="icons" src="./public/wind.png" alt="" />
             <span class="wind">${box.conditions[0]}</span>
           </div>
           <div class="div-icons-span">
-            <img class="icons" src="./public/Капля.png" alt="" />
+            <img class="icons" src="./public/humidity.png" alt="" />
             <span class="humidity">${box.conditions[1]}</span>
           </div>
           <div class="div-icons-span">
-            <img class="icons" src="./public/175970.png" alt="" />
+            <img class="icons" src="./public/precipitacion.png" alt="" />
             <span class="precipitacion">${box.conditions[2]}</span>
           </div>
         </div>
@@ -308,7 +307,7 @@ async function box() {
       const p = document.createElement("p");
       p.innerText = `${err} Мы работаем над устранением проблемы.`;
       const image = document.createElement("img");
-      image.src = "./public/Frame-14-128x128.png";
+      image.src = "./public/error.png";
       errorDiv.appendChild(image);
       errorDiv.appendChild(p);
     }
