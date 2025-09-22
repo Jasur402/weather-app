@@ -6,14 +6,21 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
+    "pretify": "prettier --write ./src index.html"
   },
   "devDependencies": {
-    "@eslint/js": "^9.35.0",
-    "eslint": "^9.35.0",
+    "@eslint/js": "^9.36.0",
+    "eslint": "^9.36.0",
     "globals": "^16.4.0",
+    "prettier": "3.6.2",
     "typescript": "~5.8.3",
-    "typescript-eslint": "^8.43.0",
+    "typescript-eslint": "^8.44.1",
     "vite": "^7.1.2"
+  },
+  "dependencies": {
+    "jiti": "^2.6.0"
   }
 }

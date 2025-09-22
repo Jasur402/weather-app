@@ -130,9 +130,9 @@ span {
   width: 150px;
 }
 
-@media screen and (max-width:1150px) {
-   .box{
+@media screen and (max-width: 1150px) {
+  .box {
     display: flex;
     flex-direction: column;
-   }
+  }
 }

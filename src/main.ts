@@ -35,7 +35,6 @@ type Data = {
 const divBox = document.querySelector<HTMLDialogElement>(".box");
 const errorDiv = document.querySelector<HTMLDivElement>(".error");
 
-
 async function getIP() {
   try {
     const resIp = await fetch("http://ip-api.com/json/");
@@ -118,7 +117,7 @@ async function paramsFunction() {
           throw new Error(`${responseUrl.status}`);
         }
         return await responseUrl.json();
-      })
+      }),
     );
     return response;
   } catch (err) {
@@ -317,13 +316,10 @@ async function box() {
 box();
 
 function update() {
-  const removeDiv = document.querySelectorAll<HTMLDivElement>("#con1");
-  if (removeDiv) {
-    removeDiv.forEach((elem) => {
-      elem.remove();
-    });
+  const div = document.querySelector<HTMLDivElement>(".box")
+  if (div) {
+    div.innerHTML = ""
   }
-
   box();
 }
 setInterval(update, 60000);
